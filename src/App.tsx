@@ -1,25 +1,43 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import WildPokemon from './pages/WildPokemon';
+import PokemonParty from './pages/PokemonParty';
+import PCBox from './pages/PCBox';
+import Footer from './components/Footer';
+import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      {/* Barra de Navegación usando Material-UI */}
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            PokeApp
+          </Typography>
+          {/* <Button color="inherit" component={Link} to="/">
+            Wild Pokemon
+          </Button>
+          <Button color="inherit" component={Link} to="/party">
+            Pokemon Party
+          </Button>
+          <Button color="inherit" component={Link} to="/pcbox">
+            PC Box
+          </Button> */}
+        </Toolbar>
+      </AppBar>
+
+      {/* Contenedor Principal */}
+      <Container sx={{ marginTop: 4 }}>
+        <Routes>
+          <Route path="/" element={<WildPokemon />} />
+          <Route path="/party" element={<PokemonParty />} />
+          <Route path="/pcbox" element={<PCBox />} />
+        </Routes>
+      </Container>
+      <Footer />
+    </Router>
   );
 }
 
