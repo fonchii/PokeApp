@@ -93,7 +93,7 @@ ipcMain.handle('add-pokemon', (event, pokemon) => {
         if (err) {
           reject(err);
         } else if (row.count >= 6) {
-          resolve({ success: false, message: 'La party ya está completa (máximo 6 Pokémon).' });
+          resolve({ success: false, message: 'No puedes llevar más de 6 Pokemon!' });
         } else {
           const stmt = db.prepare(`
             INSERT INTO party (id, name, image, type, description, attacks, level)
@@ -111,7 +111,7 @@ ipcMain.handle('add-pokemon', (event, pokemon) => {
               if (err) {
                 reject(err);
               } else {
-                resolve({ success: true });
+                resolve({ success: true, db_id: this.lastID });
               }
             }
           );
@@ -122,10 +122,10 @@ ipcMain.handle('add-pokemon', (event, pokemon) => {
 });
 
 
-ipcMain.handle('remove-pokemon', (event, id) => {
+ipcMain.handle('remove-pokemon', (event, db_id) => {
     return new Promise((resolve, reject) => {
-      const stmt = db.prepare('DELETE FROM party WHERE id = ?');
-      stmt.run(id, function (err) {
+      const stmt = db.prepare('DELETE FROM party WHERE db_id = ?');
+      stmt.run(db_id, function (err) {
         if (err) {
           reject(err);
         } else {

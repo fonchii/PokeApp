@@ -5,11 +5,8 @@ import PokemonDetailModal from './PokemonDetailModal';
 import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
 
 import { useAppDispatch } from '../store/hooks';
-import { addPokemonToParty } from '../store/slices/partySlice';
+import { addPokemonToParty, Pokemon as StoredPokemon } from '../store/slices/partySlice';
 
-// Todo: Centrar botones "Ver Info" , "Capturar"
-// Todo: Añadir icono pokeball a botón Capturar
-// Todo: Eliminar tipo hada
 
 interface Props {
   pokemonUrl: string;
@@ -29,7 +26,7 @@ interface RawPokemon {
     moves: { move: { name: string } }[];
 }
 
-interface StoredPokemon {
+/* interface StoredPokemon {
     id: number;
     name: string;
     image: string;
@@ -37,10 +34,10 @@ interface StoredPokemon {
     description: string;
     attacks: string[];
     level: number;
-}
+} */
 
 const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
-    const [pokemon, setPokemon] = useState<StoredPokemon | null>(null);
+    const [pokemon, setPokemon] = useState<Omit<StoredPokemon, 'db_id'> | null>(null);
     const [showModal, setShowModal] = useState<boolean>(false);
 
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
@@ -55,10 +52,16 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
       try {
         const response = await axios.get<RawPokemon>(pokemonUrl);
         const data = response.data;
-        const isShiny = Math.random() > 0.99
+        const isShiny = Math.random() > 0.99 && !!data.sprites.front_shiny;
+        const imageUrl = isShiny ? 
+                            `${data.sprites.front_shiny}?v=${Date.now()}` 
+                                : `${data.sprites.front_default}?v=${Date.now()}`;
+
 
         if (isShiny){
-            setSnackbarMessage(`Un ${data.name.charAt(0).toUpperCase() + data.name.slice(1)} shiny ha aparecido!`);
+            const notification = `Un ${data.name.charAt(0).toUpperCase() + data.name.slice(1)} shiny ha aparecido!`
+            console.log(notification, imageUrl)
+            setSnackbarMessage(notification);
             setSnackbarSeverity('success')
             setOpenSnackbar(true)
         }
@@ -71,10 +74,10 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
             ? flavorTextEntry.flavor_text.replace(/\f/g, ' ')
             : 'Descripción no encontrada.';
 
-        const tempPokemon: StoredPokemon = {
+        const tempPokemon: Omit<StoredPokemon, 'db_id'> = {
             id: data.id,
             name: data.name,
-            image: isShiny ? data.sprites.front_shiny : data.sprites.front_default,
+            image: imageUrl,
             type: data.types.map((typeInfo: any) => typeInfo.type.name).filter((typeName: string) => typeName !== 'fairy'),
             description: description, 
             attacks: data.moves.slice(0, 4).map((move: any) => move.move.name),
@@ -126,26 +129,32 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
         const level = Math.floor(Math.random() * 96) + 5; // 5 a 100
   
         // Crear el objeto del nuevo Pokémon
-        const newPokemon: StoredPokemon = {
+        const newPokemon: Omit<StoredPokemon, 'db_id'> = {
             ...pokemon,
             //description: description,
             level: level,
           };
     
   
-        console.log(newPokemon);
+        //  console.log(newPokemon);
   
         // Enviar el nuevo Pokémon al Proceso Principal para agregar al grupo
         const result = await window.electronAPI.addPokemon(newPokemon);
+        console.log('result: ', result)
   
-        if (result.success) {
-          setSnackbarMessage(`${newPokemon.name.charAt(0).toUpperCase() + newPokemon.name.slice(1)} capturado!`);
-          setSnackbarSeverity('success');
-          // Actualizar el estado de Redux
-          dispatch(addPokemonToParty(newPokemon)); 
+        if (result.success && result.db_id) {
+            const pokemonWithDbId: StoredPokemon = {
+                ...newPokemon,
+                db_id: result.db_id,
+              };
+            console.log('pokemonWithDbId: ', pokemonWithDbId)
+            setSnackbarMessage(`${newPokemon.name.charAt(0).toUpperCase() + newPokemon.name.slice(1)} capturado!`);
+            setSnackbarSeverity('success');
+            // Actualizar el estado de Redux
+            dispatch(addPokemonToParty(pokemonWithDbId));
         } else {
-          setSnackbarMessage(result.message || `${pokemon.name.charAt(0).toUpperCase() + newPokemon.name.slice(1)} ha escapado.`);
-          setSnackbarSeverity('error');
+            setSnackbarMessage(result.message || `${pokemon.name.charAt(0).toUpperCase() + newPokemon.name.slice(1)} ha escapado.`);
+            setSnackbarSeverity('error');
         }
         setOpenSnackbar(true);
         

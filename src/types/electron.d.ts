@@ -1,4 +1,5 @@
-export interface Pokemon {
+import { Pokemon } from '../store/slices/partySlice';
+/* export interface Pokemon {
     id: number;
     name: string;
     image: string;
@@ -6,14 +7,14 @@ export interface Pokemon {
     description: string;
     attacks: string[];
     level: number;
-  }
-  
-  declare global {
+  } */
+
+declare global {
     interface Window {
       electronAPI: {
         loadParty: () => Promise<Pokemon[]>;
-        addPokemon: (pokemon: Pokemon) => Promise<{ success: boolean; message?: string }>;
+        addPokemon: (pokemon: Omit<Pokemon, 'db_id'>) => Promise<{ success: boolean; message?: string; db_id?: number }>;
         removePokemon: (id: number) => Promise<{ success: boolean }>;
       };
     }
-  }
+}

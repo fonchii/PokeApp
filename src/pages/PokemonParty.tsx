@@ -4,18 +4,8 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { RootState } from '../store/store';
-import { removePokemonFromParty } from '../store/slices/partySlice';
+import { releasePokemonFromParty, Pokemon } from '../store/slices/partySlice';
 
-
-interface Pokemon {
-    id: number;
-    name: string;
-    image: string;
-    type: string[];
-    description: string;
-    attacks: string[];
-    level: number;
-}
 
 
 const PokemonParty: React.FC = () => {
@@ -26,16 +16,16 @@ const PokemonParty: React.FC = () => {
     const [snackbarMessage, setSnackbarMessage] = useState<string>('');
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'warning' | 'error'>('success');
 
-    const handleRelease = async (id: number) => {
+    const handleRelease = async (db_id: number) => {
         if (!window.electronAPI) {
           console.error('Electron API no está disponible');
           return;
         }
     
         try {
-          const result = await window.electronAPI.removePokemon(id);
+          const result = await window.electronAPI.removePokemon(db_id);
           if (result.success) {
-            dispatch(removePokemonFromParty(id));
+            dispatch(releasePokemonFromParty(db_id));
             setSnackbarMessage('Pokémon liberado correctamente.');
             setSnackbarSeverity('success');
           } else {
@@ -107,7 +97,7 @@ const PokemonParty: React.FC = () => {
                     <Button
                         size="small"
                         color="error"
-                        onClick={() => handleRelease(pokemon.id)}
+                        onClick={() => handleRelease(pokemon.db_id)}
                         startIcon={<RemoveCircleOutlineIcon />} 
                     >
                         Liberar

@@ -4,13 +4,14 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 // Todo: Investigar -> createAsyncThunk
 
 export interface Pokemon {
-  id: number;
-  name: string;
-  image: string;
-  type: string[];
-  description: string;
-  attacks: string[];
-  level: number;
+    db_id: number;
+    id: number;
+    name: string;
+    image: string;
+    type: string[];
+    description: string;
+    attacks: string[];
+    level: number;
 }
 
 interface PartyState {
@@ -41,12 +42,12 @@ const partySlice = createSlice({
     }, 
     
     // Liberar Pokemon del Grupo
-    removePokemonFromParty(state, action: PayloadAction<number>) {
-      state.party = state.party.filter(pokemon => pokemon.id !== action.payload);
+    releasePokemonFromParty(state, action: PayloadAction<number>) {
+      state.party = state.party.filter(pokemon => pokemon.db_id !== action.payload);
     },
   },
 });
 
-export const { loadParty, addPokemonToParty, removePokemonFromParty } = partySlice.actions;
+export const { loadParty, addPokemonToParty, releasePokemonFromParty } = partySlice.actions;
 
 export default partySlice.reducer;

@@ -11,7 +11,6 @@ import Footer from './components/Footer';
 import { useAppDispatch } from './store/hooks';
 import { loadParty } from './store/slices/partySlice';
 
-// Todo: Fix -> Capturar más de un pokemon del mismo tipo
 
 function App() {
 

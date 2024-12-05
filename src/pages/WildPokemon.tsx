@@ -5,7 +5,10 @@ import { typeColors } from '../constants/typeColors';
 import PokemonCard from '../components/PokemonCard';
 import { Grid, Card, CardMedia, CardContent, Typography, /* CardActions, Button */ } from '@mui/material';
 
+
+
 const WildPokemon: React.FC = () => {
+    
   const [selectedType, setSelectedType] = useState<string>('');
   const [selectedSpanishType, setSelectedSpanishType] = useState<string>('');
   const [pokemons, setPokemons] = useState<any[]>([]);

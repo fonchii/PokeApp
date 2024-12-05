@@ -14,8 +14,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
 // Definir la estructura de la base de datos
 const createPartyTable = `
   CREATE TABLE IF NOT EXISTS party (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
+    db_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER NOT NULL,name TEXT NOT NULL,
     image TEXT NOT NULL,
     type TEXT NOT NULL,
     description TEXT,

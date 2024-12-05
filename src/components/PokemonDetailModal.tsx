@@ -4,7 +4,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, 
 import { Pokemon } from '../store/slices/partySlice';
 
 interface Props {
-    pokemon: Pokemon;
+    pokemon: Omit<Pokemon, 'db_id'>;
     onClose: () => void;
 }
 
