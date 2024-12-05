@@ -1,7 +1,7 @@
 import React from 'react';
 import { BottomNavigation, BottomNavigationAction, Paper } from '@mui/material';
-import WhatshotIcon from '@mui/icons-material/Whatshot'; // Wild Pokémon
-import GroupIcon from '@mui/icons-material/Group'; // Pokémon Party
+// import WhatshotIcon from '@mui/icons-material/Whatshot'; // Wild Pokémon
+// import GroupIcon from '@mui/icons-material/Group'; // Pokémon Party
 import StorageIcon from '@mui/icons-material/Storage'; // PC Box
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -44,8 +44,12 @@ const Footer: React.FC = () => {
   return (
     <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, height:'8vh' }} elevation={3}>
       <BottomNavigation value={value} onChange={handleChange}>
-        <BottomNavigationAction label="Wild" icon={<WhatshotIcon />} />
-        <BottomNavigationAction label="Party" icon={<GroupIcon />} />
+        <BottomNavigationAction label="Wild" /* icon={<WhatshotIcon />} */ 
+            icon={<img height='40px' src={"/icons/grass-svgrepo-com.svg"} alt={"hierba"} />}
+        />
+        <BottomNavigationAction label="Party"/*  icon={<GroupIcon />} */ 
+            icon={<img height='35px' src={"/icons/backpack-bag-holidays-svgrepo-com.svg"} alt={"hierba"} />}
+        />
         <BottomNavigationAction label="PC Box" icon={<StorageIcon />} />
       </BottomNavigation>
     </Paper>
