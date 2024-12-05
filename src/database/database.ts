@@ -3,7 +3,8 @@ import path from 'path';
 import fs from 'fs';
 
 // Definir la ruta del archivo de la base de datos
-const dbPath = path.resolve(__dirname, 'pokemon.db');
+//const dbPath = path.resolve(__dirname, 'pokemon.db');
+const dbPath = path.resolve(__dirname, '../../pokemon.db');
 
 // Verificar si el archivo de la base de datos existe; si no, crearlo
 const dbExists = fs.existsSync(dbPath);
@@ -12,7 +13,7 @@ const dbExists = fs.existsSync(dbPath);
 const db = new Database(dbPath);
 
 // Si la base de datos es nueva, crear las tablas necesarias
-if (!dbExists) {
+/* if (!dbExists) {
   db.exec(`
     CREATE TABLE party (
       id INTEGER PRIMARY KEY,
@@ -36,4 +37,22 @@ if (!dbExists) {
   `);
 }
 
+export default db; */
+
+// Definir la estructura de la base de datos
+const createPartyTable = db.prepare(`
+    CREATE TABLE IF NOT EXISTS party (
+      id INTEGER PRIMARY KEY,
+      name TEXT NOT NULL,
+      image TEXT NOT NULL,
+      type TEXT NOT NULL,
+      description TEXT,
+      attacks TEXT,
+      level INTEGER
+    )
+  `);
+  
+  createPartyTable.run();
+  
+// Exportar la conexión a la base de datos
 export default db;
