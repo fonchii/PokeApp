@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 //const db = require('./src/database/database');
-const db = require('./src/database/database.js')
+const { partyDB, pcBoxDB } = require('./src/database/database.js')
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -68,10 +68,12 @@ app.on('window-all-closed', () => {
 
 
 
-// IPC Handlers
+// --- Funciones IPC para grupo Pokemon --- //
+
+// Cargar grupo Pokemon desde la base de datos
 ipcMain.handle('load-party', (event) => {
     return new Promise((resolve, reject) => {
-      db.all('SELECT * FROM party', [], (err, rows) => {
+      partyDB.all('SELECT * FROM party', [], (err, rows) => {
         if (err) {
           reject(err);
         } else {
@@ -87,36 +89,62 @@ ipcMain.handle('load-party', (event) => {
     });
 });
 
+// Añadir un Pokémon a la Party o al PC Box si la Party está llena
 ipcMain.handle('add-pokemon', (event, pokemon) => {
     return new Promise((resolve, reject) => {
-      db.get('SELECT COUNT(*) as count FROM party', [], (err, row) => {
+      partyDB.get('SELECT COUNT(*) as count FROM party', [], (err, row) => {
         if (err) {
           reject(err);
         } else if (row.count >= 6) {
-          resolve({ success: false, message: 'No puedes llevar más de 6 Pokemon!' });
+          //resolve({ success: false, message: 'No puedes llevar más de 6 Pokemon!' });
+          
+          // Añadir al PC Box si la party está llena
+            const stmt = pcBoxDB.prepare(`
+                INSERT INTO pc_box (id, name, image, type, description, attacks, level)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `);
+            stmt.run(
+                pokemon.id,
+                pokemon.name,
+                pokemon.image,
+                JSON.stringify(pokemon.type),
+                pokemon.description,
+                JSON.stringify(pokemon.attacks),
+                pokemon.level,
+                function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({ success: true, db_id: this.lastID, addedToPCBox: true });
+                }
+                }
+            );
+            stmt.finalize();
+
         } else {
-          const stmt = db.prepare(`
-            INSERT INTO party (id, name, image, type, description, attacks, level)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-          `);
-          stmt.run(
-            pokemon.id,
-            pokemon.name,
-            pokemon.image,
-            JSON.stringify(pokemon.type),
-            pokemon.description,
-            JSON.stringify(pokemon.attacks),
-            pokemon.level,
-            function (err) {
-              if (err) {
-                reject(err);
-              } else {
-                resolve({ success: true, db_id: this.lastID });
-              }
+            // Añadir al equipo si hay espacio
+            const stmt = partyDB.prepare(`
+                INSERT INTO party (id, name, image, type, description, attacks, level)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            `);
+            stmt.run(
+                pokemon.id,
+                pokemon.name,
+                pokemon.image,
+                JSON.stringify(pokemon.type),
+                pokemon.description,
+                JSON.stringify(pokemon.attacks),
+                pokemon.level,
+                function (err) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve({ success: true, db_id: this.lastID });
+                }
+                }
+            );
+            stmt.finalize();
             }
-          );
-          stmt.finalize();
-        }
       });
     });
 });
@@ -124,7 +152,7 @@ ipcMain.handle('add-pokemon', (event, pokemon) => {
 
 ipcMain.handle('remove-pokemon', (event, db_id) => {
     return new Promise((resolve, reject) => {
-      const stmt = db.prepare('DELETE FROM party WHERE db_id = ?');
+      const stmt = partyDB.prepare('DELETE FROM party WHERE db_id = ?');
       stmt.run(db_id, function (err) {
         if (err) {
           reject(err);
@@ -135,3 +163,75 @@ ipcMain.handle('remove-pokemon', (event, db_id) => {
       stmt.finalize();
     });
 });
+
+
+
+
+
+// --- Funciones IPC para el PC Box --- //
+
+// Cargar los Pokémon del PC Box desde la base de datos
+ipcMain.handle('load-pcbox', (event) => {
+    return new Promise((resolve, reject) => {
+      pcBoxDB.all('SELECT * FROM pc_box', [], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          const parsedRows = rows.map(row => ({
+            db_id: row.db_id,
+            id: row.id,
+            name: row.name,
+            image: row.image,
+            type: JSON.parse(row.type),
+            description: row.description,
+            attacks: JSON.parse(row.attacks),
+            level: row.level,
+          }));
+          resolve(parsedRows);
+        }
+      });
+    });
+  });
+  
+  // Añadir un Pokémon al PC Box - Ya manejado en 'add-pokemon'
+  ipcMain.handle('add-pcbox-pokemon', (event, pokemon) => {
+    return new Promise((resolve, reject) => {
+      const stmt = pcBoxDB.prepare(`
+        INSERT INTO pc_box (id, name, image, type, description, attacks, level)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      stmt.run(
+        pokemon.id,
+        pokemon.name,
+        pokemon.image,
+        JSON.stringify(pokemon.type),
+        pokemon.description,
+        JSON.stringify(pokemon.attacks),
+        pokemon.level,
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({ success: true, db_id: this.lastID });
+          }
+        }
+      );
+      stmt.finalize();
+    });
+  });
+  
+  
+  // Liberar un Pokémon del PC Box
+  ipcMain.handle('remove-pcbox-pokemon', (event, db_id) => {
+    return new Promise((resolve, reject) => {
+      const stmt = pcBoxDB.prepare('DELETE FROM pc_box WHERE db_id = ?');
+      stmt.run(db_id, function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve({ success: this.changes > 0 });
+        }
+      });
+      stmt.finalize();
+    });
+  });

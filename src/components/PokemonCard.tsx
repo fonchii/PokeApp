@@ -107,23 +107,18 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
     try {
         // Verificar si el grupo ya tiene 6 Pokemon
         const currentParty = await window.electronAPI.loadParty();
+        let msg: string
         if (currentParty.length >= 6) {
-            setSnackbarMessage('No puedes llevar más de 6 Pokemon!');
-            setSnackbarSeverity('warning');
-            setOpenSnackbar(true);
-            return;
+            msg = `Tu equipo está completo, ${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)} fué enviado al PC.` 
+            //setSnackbarMessage('No puedes llevar más de 6 Pokemon!');
+            //setSnackbarMessage(msg)
+            //setSnackbarSeverity('warning');
+            //setOpenSnackbar(true);
+            //return;
         }
-  
-        // Obtener la descripción del Pokémon en español
-        // const descriptionUrl = pokemonUrl.replace('/pokemon/', '/pokemon-species/')
-        // console.log('pokemonUrl, descriptionUrl: ', pokemonUrl, descriptionUrl )
-        /* const speciesResponse = await axios.get<{ flavor_text_entries: any[] }>(pokemonUrl.replace('/pokemon/', '/pokemon-species/'));
-        const flavorTextEntry = speciesResponse.data.flavor_text_entries.find(
-            (entry: any) => entry.language.name === 'es'
-        );
-        const description = flavorTextEntry
-            ? flavorTextEntry.flavor_text.replace(/\f/g, ' ')
-            : 'Descripción no encontrada.'; */
+        else{
+            msg = `${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)} capturado!`
+        }
   
         // Asignar un nivel aleatorio entre 5 y 100
         const level = Math.floor(Math.random() * 96) + 5; // 5 a 100
@@ -135,7 +130,6 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
             level: level,
           };
     
-  
         //  console.log(newPokemon);
   
         // Enviar el nuevo Pokémon al Proceso Principal para agregar al grupo
@@ -148,7 +142,7 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
                 db_id: result.db_id,
               };
             console.log('pokemonWithDbId: ', pokemonWithDbId)
-            setSnackbarMessage(`${newPokemon.name.charAt(0).toUpperCase() + newPokemon.name.slice(1)} capturado!`);
+            setSnackbarMessage(msg);
             setSnackbarSeverity('success');
             // Actualizar el estado de Redux
             dispatch(addPokemonToParty(pokemonWithDbId));

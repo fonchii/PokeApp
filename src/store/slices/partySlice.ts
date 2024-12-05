@@ -16,10 +16,12 @@ export interface Pokemon {
 
 interface PartyState {
   party: Pokemon[];
+  pcBox: Pokemon[];
 }
 
 const initialState: PartyState = {
   party: [],
+  pcBox: [],
 };
 
 const partySlice = createSlice({
@@ -36,7 +38,7 @@ const partySlice = createSlice({
       if (state.party.length < 6) {
         state.party.push(action.payload);
       } else {
-        console.warn('No puedes llevar más de 6 Pokemon!');
+        console.warn('No puedes llevar más de 6 Pokemon en el equipo!');
         // Manejar el caso donde la party ya tiene 6 Pokemon -> Enviar a PC 
       }
     }, 
@@ -45,9 +47,35 @@ const partySlice = createSlice({
     releasePokemonFromParty(state, action: PayloadAction<number>) {
       state.party = state.party.filter(pokemon => pokemon.db_id !== action.payload);
     },
+
+
+    // Cargar PC Box desde SQLite
+    loadPCBox(state, action: PayloadAction<Pokemon[]>) {
+            state.pcBox = action.payload;
+    },
+
+    // Añadir Pokémon al PC Box
+    addPokemonToPCBox(state, action: PayloadAction<Pokemon>) {
+        state.pcBox.push(action.payload);
+    },
+
+    // Liberar Pokémon del PC Box
+    releasePokemonFromPCBox(state, action: PayloadAction<number>) {
+        state.pcBox = state.pcBox.filter(pokemon => pokemon.db_id !== action.payload);
+    },
+
   },
 });
 
-export const { loadParty, addPokemonToParty, releasePokemonFromParty } = partySlice.actions;
+export const { 
+    // Grupo
+    loadParty, 
+    addPokemonToParty, 
+    releasePokemonFromParty, 
+    // PC Box
+    loadPCBox,
+    addPokemonToPCBox,
+    releasePokemonFromPCBox
+} = partySlice.actions;
 
 export default partySlice.reducer;
