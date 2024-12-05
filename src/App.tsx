@@ -1,13 +1,41 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Container } from '@mui/material';
+import './App.css';
+
 import WildPokemon from './pages/WildPokemon';
 import PokemonParty from './pages/PokemonParty';
 import PCBox from './pages/PCBox';
 import Footer from './components/Footer';
-import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
-import './App.css';
+
+import { useAppDispatch } from './store/hooks';
+import { loadParty } from './store/slices/partySlice';
+
 
 function App() {
+
+    const dispatch = useAppDispatch();
+
+    // Cargar equipo Pokemon al iniciar la App
+    useEffect(() => {
+        const fetchParty = async () => {
+          if (!window.electronAPI) {
+            console.error('Electron API no está disponible');
+            return;
+          }
+    
+          try {
+            const loadedParty = await window.electronAPI.loadParty();
+            dispatch(loadParty(loadedParty));
+          } catch (error) {
+            console.error('Error al cargar la party:', error);
+          }
+        };
+    
+        fetchParty();
+    }, [dispatch]);
+
+
   return (
     <Router>
       {/* Barra de Navegación usando Material-UI */}

@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Card, CardMedia, CardContent, Typography, CardActions, Button } from '@mui/material';
+import { Card, CardMedia, CardContent, Typography, CardActions, Button, Snackbar, Alert } from '@mui/material';
 import PokemonDetailModal from './PokemonDetailModal';
+import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
+
+import { useAppDispatch } from '../store/hooks';
+import { addPokemonToParty } from '../store/slices/partySlice';
 
 // Todo: Centrar botones "Ver Info" , "Capturar"
 // Todo: Añadir icono pokeball a botón Capturar
@@ -11,15 +15,74 @@ interface Props {
   pokemonUrl: string;
 }
 
-const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
-  const [pokemon, setPokemon] = useState<any>(null);
-  const [showModal, setShowModal] = useState<boolean>(false);
+interface RawPokemon {
+    id: number;
+    name: string;
+    sprites: {
+        front_default: string;
+        front_shiny: string;
+    };
+    species: {
+        url: string;
+    };
+    types: { type: { name: string } }[];
+    moves: { move: { name: string } }[];
+}
 
+interface StoredPokemon {
+    id: number;
+    name: string;
+    image: string;
+    type: string[];
+    description: string;
+    attacks: string[];
+    level: number;
+}
+
+const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
+    const [pokemon, setPokemon] = useState<StoredPokemon | null>(null);
+    const [showModal, setShowModal] = useState<boolean>(false);
+
+    const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
+    const [snackbarMessage, setSnackbarMessage] = useState<string>('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'warning' | 'error'>('success');
+
+    const dispatch = useAppDispatch();
+
+  // Obtener datos del Pokémon desde la API al montar el componente
   useEffect(() => {
     const fetchPokemon = async () => {
       try {
-        const response = await axios.get(pokemonUrl);
-        setPokemon(response.data);
+        const response = await axios.get<RawPokemon>(pokemonUrl);
+        const data = response.data;
+        const isShiny = Math.random() > 0.99
+
+        if (isShiny){
+            setSnackbarMessage(`Un ${data.name.charAt(0).toUpperCase() + data.name.slice(1)} shiny ha aparecido!`);
+            setSnackbarSeverity('success')
+            setOpenSnackbar(true)
+        }
+
+        const speciesResponse = await axios.get<{ flavor_text_entries: any[] }>(pokemonUrl.replace('/pokemon/', '/pokemon-species/'));
+        const flavorTextEntry = speciesResponse.data.flavor_text_entries.find(
+            (entry: any) => entry.language.name === 'es'
+        );
+        const description = flavorTextEntry
+            ? flavorTextEntry.flavor_text.replace(/\f/g, ' ')
+            : 'Descripción no encontrada.';
+
+        const tempPokemon: StoredPokemon = {
+            id: data.id,
+            name: data.name,
+            image: isShiny ? data.sprites.front_shiny : data.sprites.front_default,
+            type: data.types.map((typeInfo: any) => typeInfo.type.name).filter((typeName: string) => typeName !== 'fairy'),
+            description: description, 
+            attacks: data.moves.slice(0, 4).map((move: any) => move.move.name),
+            level: 0, // Se asigna al capturar
+          };
+
+          setPokemon(tempPokemon);
+
       } catch (error) {
         console.error('Error al obtener datos del Pokémon:', error);
       }
@@ -32,69 +95,124 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
 
 
   const handleCatch = async () => {
+
+    if (!window.electronAPI) {
+        console.error('Electron API no está disponible');
+        return;
+    }
+
     try {
-      // Obtener la descripción del Pokémon
-      const speciesResponse = await axios.get(pokemon.species.url);
-      const flavorTextEntry = speciesResponse.data.flavor_text_entries.find(
-        (entry: any) => entry.language.name === 'es'
-      );
-      const description = flavorTextEntry
-        ? flavorTextEntry.flavor_text.replace(/\f/g, ' ')
-        : 'Descripción no encontrada.';
-
-      // Asignar un nivel aleatorio entre 1 y 100
-      const level = Math.floor(Math.random() * 100) + 1;
-
-      // Crear el objeto del nuevo Pokémon
-      const newPokemon = {
-        id: pokemon.id,
-        name: pokemon.name,
-        image: pokemon.sprites.front_default,
-        type: pokemon.types
-            .filter((type: any) => type.type.name !== 'fairy')
-            .map((type: any) => type.type.name), //pokemon.types[0].type.name,
-        description: description,
-        attacks: pokemon.moves.slice(0, 4).map((move: any) => move.move.name),
-        level: level,
-      };
-
-      
-      console.log(newPokemon)
+        // Verificar si el grupo ya tiene 6 Pokemon
+        const currentParty = await window.electronAPI.loadParty();
+        if (currentParty.length >= 6) {
+            setSnackbarMessage('No puedes llevar más de 6 Pokemon!');
+            setSnackbarSeverity('warning');
+            setOpenSnackbar(true);
+            return;
+        }
+  
+        // Obtener la descripción del Pokémon en español
+        // const descriptionUrl = pokemonUrl.replace('/pokemon/', '/pokemon-species/')
+        // console.log('pokemonUrl, descriptionUrl: ', pokemonUrl, descriptionUrl )
+        /* const speciesResponse = await axios.get<{ flavor_text_entries: any[] }>(pokemonUrl.replace('/pokemon/', '/pokemon-species/'));
+        const flavorTextEntry = speciesResponse.data.flavor_text_entries.find(
+            (entry: any) => entry.language.name === 'es'
+        );
+        const description = flavorTextEntry
+            ? flavorTextEntry.flavor_text.replace(/\f/g, ' ')
+            : 'Descripción no encontrada.'; */
+  
+        // Asignar un nivel aleatorio entre 5 y 100
+        const level = Math.floor(Math.random() * 96) + 5; // 5 a 100
+  
+        // Crear el objeto del nuevo Pokémon
+        const newPokemon: StoredPokemon = {
+            ...pokemon,
+            //description: description,
+            level: level,
+          };
     
-        // Agregar al equipo (redux) o guardar en SQLite
+  
+        console.log(newPokemon);
+  
+        // Enviar el nuevo Pokémon al Proceso Principal para agregar al grupo
+        const result = await window.electronAPI.addPokemon(newPokemon);
+  
+        if (result.success) {
+          setSnackbarMessage(`${newPokemon.name.charAt(0).toUpperCase() + newPokemon.name.slice(1)} capturado!`);
+          setSnackbarSeverity('success');
+          // Actualizar el estado de Redux
+          dispatch(addPokemonToParty(newPokemon)); 
+        } else {
+          setSnackbarMessage(result.message || `${pokemon.name.charAt(0).toUpperCase() + newPokemon.name.slice(1)} ha escapado.`);
+          setSnackbarSeverity('error');
+        }
+        setOpenSnackbar(true);
+        
     } catch (error) {
         console.error('Error al capturar el Pokémon:', error);
-    }
+        setSnackbarMessage('Ocurrió un error al capturar el Pokémon.');
+        setSnackbarSeverity('error');
+        setOpenSnackbar(true);
+      }
     };
+
+    const handleCloseSnackbar = () => {
+        setOpenSnackbar(false);
+      };
 
   return (
     <>
       <Card>
+        {/* Imagen */}
         <CardMedia
           component="img"
           // width="140"
-          image={pokemon.sprites.front_default}
+          image={pokemon.image}
           alt={pokemon.name}
         />
+        
+        {/* Info */}
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">
             {pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            ID: {pokemon.id}
+            Pokedex: {pokemon.id}
           </Typography>
         </CardContent>
-        <CardActions > 
+
+        {/* Botones */}
+        <CardActions sx={{ justifyContent: 'center' }} > 
           <Button size="small" onClick={() => setShowModal(true)}>
             Ver Info
           </Button>
-          <Button size="small" variant="contained" color="primary" onClick={handleCatch}>
+          <Button
+            size="small"
+            variant="contained"
+            color="primary"
+            onClick={handleCatch}
+            startIcon={<CatchingPokemonIcon />} 
+          >
             {/* Catch it */}
             Capturar
           </Button>
         </CardActions>
       </Card>
+
+      {/* Modal Detalles */}
       {showModal && <PokemonDetailModal pokemon={pokemon} onClose={() => setShowModal(false)} />}
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

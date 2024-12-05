@@ -34,7 +34,7 @@ const WildPokemon: React.FC = () => {
   return (
     <div>
       <Typography variant="h4" gutterBottom>
-        Wild Pokémon
+        Wild Pokemon
       </Typography>
       <Grid container spacing={2}>
         {pokemonTypes.map((type) => (
@@ -74,7 +74,7 @@ const WildPokemon: React.FC = () => {
           <Typography variant="h5" gutterBottom sx={{ marginTop: 4 }}>
             Pokémon de tipo {selectedSpanishType.charAt(0).toUpperCase() + selectedSpanishType.slice(1)}
           </Typography>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} mb='10vh' >
             {pokemons.map((pokemon) => (
               <Grid item xs={4} /* sm={6} md={4} lg={3} */ key={pokemon.name}>
                 <PokemonCard pokemonUrl={pokemon.url} />

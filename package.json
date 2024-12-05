@@ -2,12 +2,13 @@
   "name": "pokeapp",
   "version": "0.1.0",
   "private": true,
-  "main": "public/electron.js",
+  "main": "main.js",
   "dependencies": {
     "@emotion/react": "^11.13.5",
     "@emotion/styled": "^11.13.5",
     "@mui/icons-material": "^6.1.9",
     "@mui/material": "^6.1.9",
+    "@reduxjs/toolkit": "^2.4.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
@@ -15,19 +16,36 @@
     "@types/node": "^16.18.121",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "better-sqlite3": "^11.6.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-redux": "^9.1.2",
     "react-router-dom": "^7.0.2",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "_start": "react-scripts start",
-    "start": "concurrently \"react-scripts start\" \"wait-on http://localhost:30151 && electron .\"",
-    "build": "react-scripts build",
+    "start": "react-scripts start",
+    "_start": "concurrently \"react-scripts start\" \"wait-on http://localhost:30151 && electron .\"",
+    "electron": "electron .",
+    "dev": "concurrently \"npm:start\" \"npm:electron\"",
+    "build_react": "react-scripts build",
+    "build": "electron-builder",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
+  },
+  "build": {
+    "appId": "com.fonchi.pokeapp",
+    "files": [
+      "build/**/*",
+      "main.js",
+      "preload.js",
+      "src/database/database.ts"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -48,6 +66,7 @@
     ]
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
     "@types/electron": "^1.6.12",
     "concurrently": "^9.1.0",
     "electron": "^33.2.1",
