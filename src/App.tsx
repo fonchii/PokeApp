@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import { useAppDispatch } from './store/hooks';
 import { loadParty } from './store/slices/partySlice';
 
+// Todo: Fix -> Capturar más de un pokemon del mismo tipo
 
 function App() {
 
@@ -57,7 +58,7 @@ function App() {
       </AppBar>
 
       {/* Contenedor Principal */}
-      <Container sx={{ marginTop: 4 }}>
+      <Container sx={{ marginTop: 3, maxHeight:'76vh', overflowY:'auto' }}>
         <Routes>
           <Route path="/" element={<WildPokemon />} />
           <Route path="/party" element={<PokemonParty />} />

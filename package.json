@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "main": "main.js",
+  "homepage": "./",
+  "description": "Aplicación de gestión de Pokémon",
+  "author": "Christian Pflaumer",
   "dependencies": {
     "@emotion/react": "^11.13.5",
     "@emotion/styled": "^11.13.5",
@@ -28,11 +31,12 @@
   "scripts": {
     "start": "react-scripts start",
     "postinstall": "electron-rebuild",
-    "electron": "wait-on http://localhost:3000 && electron .",
-    "dev": "concurrently \"npm:start\" \"npm:electron\"",  
-    "electron_prod": "electron .",  
+    "electron": "electron .",
+    "dev": "concurrently \"npm:start\" \"npm:electron\"",
+    "electron_prod": "electron .",
     "build_react": "react-scripts build",
     "build": "react-scripts build && electron-builder",
+    "electron_fail": "wait-on http://localhost:3000 && electron .",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -42,7 +46,7 @@
       "build/**/*",
       "main.js",
       "preload.js",
-      "src/database/database.js"
+      "pokemon.db"
     ],
     "directories": {
       "buildResources": "assets"
@@ -68,10 +72,10 @@
   },
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
-    "@types/better-sqlite3": "^7.6.12",
     "@types/electron": "^1.6.12",
     "concurrently": "^9.1.0",
     "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
     "wait-on": "^8.0.1"
   }
 }

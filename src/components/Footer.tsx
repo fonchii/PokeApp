@@ -45,10 +45,10 @@ const Footer: React.FC = () => {
     <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, height:'8vh' }} elevation={3}>
       <BottomNavigation value={value} onChange={handleChange}>
         <BottomNavigationAction label="Wild" /* icon={<WhatshotIcon />} */ 
-            icon={<img height='40px' src={"/icons/grass-svgrepo-com.svg"} alt={"hierba"} />}
+            icon={<img height='30px' src={"/icons/grass-svgrepo-com.svg"} alt={"hierba"} />}
         />
         <BottomNavigationAction label="Party"/*  icon={<GroupIcon />} */ 
-            icon={<img height='35px' src={"/icons/backpack-bag-holidays-svgrepo-com.svg"} alt={"hierba"} />}
+            icon={<img height='25px' src={"/icons/backpack-bag-holidays-svgrepo-com.svg"} alt={"hierba"} />}
         />
         <BottomNavigationAction label="PC Box" icon={<StorageIcon />} />
       </BottomNavigation>

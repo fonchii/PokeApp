@@ -1,12 +1,18 @@
 const path = require('path');
-const fs = require('fs');
-const Database = require('better-sqlite3');
+const sqlite3 = require('sqlite3').verbose();
 
+// Ruta a la base de datos
 const dbPath = path.resolve(__dirname, '../../pokemon.db');
-const db = new Database(dbPath);
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('Error al conectar con la base de datos:', err.message);
+  } else {
+    console.log('Conectado a la base de datos SQLite.');
+  }
+});
 
-// Define la estructura de la base de datos
-const createPartyTable = db.prepare(`
+// Definir la estructura de la base de datos
+const createPartyTable = `
   CREATE TABLE IF NOT EXISTS party (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
@@ -16,9 +22,15 @@ const createPartyTable = db.prepare(`
     attacks TEXT,
     level INTEGER
   )
-`);
+`;
 
-createPartyTable.run();
+db.run(createPartyTable, (err) => {
+  if (err) {
+    console.error('Error al crear la tabla party:', err.message);
+  } else {
+    console.log('Tabla party creada o ya existe.');
+  }
+});
 
 // Exporta la conexión a la base de datos
 module.exports = db;
