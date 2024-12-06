@@ -6,7 +6,7 @@ import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
 
 import { useAppDispatch } from '../store/hooks';
 import { addPokemonToParty, Pokemon as PartyPokemon } from '../store/slices/partySlice';
-import { addPokemonToPCBox, PCBoxPokemon } from '../store/slices/pcBoxSlice';
+import { addPokemonToPCBox } from '../store/slices/pcBoxSlice';
 
 
 interface Props {
