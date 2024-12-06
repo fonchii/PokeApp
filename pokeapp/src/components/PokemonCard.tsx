@@ -75,13 +75,16 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
             ? flavorTextEntry.flavor_text.replace(/\f/g, ' ')
             : 'Descripción no encontrada.';
 
+        // Seleccionar hasta 4 movimientos al azar
+        const selectedMoves = getRandomItems(data.moves, 4).map((move: any) => move.move.name);
         const tempPokemon: Omit<PartyPokemon, 'db_id'> = {
             id: data.id,
             name: data.name,
             image: imageUrl,
             type: data.types.map((typeInfo: any) => typeInfo.type.name).filter((typeName: string) => typeName !== 'fairy'),
             description: description, 
-            attacks: data.moves.slice(0, 4).map((move: any) => move.move.name),
+            // attacks: data.moves.slice(0, 4).map((move: any) => move.move.name), // Primeros 4 ataques
+            attacks: selectedMoves,
             level: 0, // Se asigna al capturar
           };
 
@@ -247,3 +250,13 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
 };
 
 export default PokemonCard;
+
+// Función para escoger "n" elementos aleatorios de un array "items"
+function getRandomItems<T>(items: T[], n: number): T[] {
+    const shuffled = [...items];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, n);
+  }

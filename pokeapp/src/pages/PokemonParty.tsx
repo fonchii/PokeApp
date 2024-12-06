@@ -88,6 +88,9 @@ const PokemonParty: React.FC = () => {
                   <Typography variant="body2" color="text.secondary">
                     Tipo: {pokemon.type}
                   </Typography>
+                  {/* <Typography variant="body2" color="text.secondary">
+                    Movimientos: {pokemon.attacks}
+                  </Typography> */}
                   <Typography variant="body2" color="text.secondary">
                     Nivel: {pokemon.level}
                   </Typography>
