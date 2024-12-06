@@ -1,11 +1,11 @@
 # PokAapp
- Proyecto de app de escritorio utilizando PokeApi - Electron JS, React, Typescript, SQLite
+Proyecto de aplicación de escritorio para la gestión de Pokémon utilizando PokeApi.
 
 ## Utilización
 
 ### 1. Iniciar Mongodb
 
-```
+```bash
 mongod
 ```
 
@@ -13,7 +13,8 @@ mongod
 
 En directorio pcbox-backend/:
 
-```
+```bash
+npm install
 npm run build
 npm start
 ```

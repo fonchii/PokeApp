@@ -1,5 +1,5 @@
 # PokeApp
- Proyecto de app de escritorio utilizando PokeApi - Electron JS, React, Typescript, SQLite
+Proyecto de aplicación de escritorio para la gestión de Pokémon utilizando PokeApi.
 
 ## Información Básica de la App
 
@@ -27,7 +27,8 @@
 ### Modo desarrollo
 
 Ejecutar:
-```
+```bash
+npm install
 npm run dev
 ```
 
@@ -35,11 +36,14 @@ npm run dev
 ### Producción
 Ejecutar:
 
-```
+```bash
+npm install
 npm run build
 ```
+Buscar el ejecutable en el directorio `dist/win-unpacked/` o instalar mediante el instalador `pokeapp/Setup 0.1.0.exe`.
+
 
 ## Bugs Conocidos
 
-- Algunas veces el sprite de Pokemon shiny no aparece ni se guarda correctamente, visualizándose el sprite normal.
-- El "mismo" Pokemon puede ser capturado multiples veces, es decir, si aparece un Shiny puede capturarse multiples veces generando niveles diferentes cada vez.
+- **Sprites de Pokémon Shiny:** En ocasiones, el sprite de Pokémon shiny no aparece ni se guarda correctamente, mostrando el sprite normal.
+- **Captura de Múltiples Instancias del Mismo Pokémon:** Es posible capturar múltiples veces el mismo Pokémon, incluyendo variantes shiny sin actualizar sus sprites.

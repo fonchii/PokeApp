@@ -40,7 +40,7 @@ Proyecto de aplicación de escritorio para la gestión de Pokémon utilizando Po
 ### **Otros**
 
 - **[PokeApi](https://pokeapi.co/):** API pública para obtener datos sobre Pokémon.
-- **[Node.js](https://nodejs.org/):** Entorno de ejecución para JavaScript en el servidor.
+- **[Node.js](https://nodejs.org/):** Entorno de ejecución para JavaScript.
 
 ## Instalación y Uso
 
