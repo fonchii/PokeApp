@@ -5,11 +5,15 @@
 
 ### 1. Iniciar Mongodb
 
+```
 mongod
+```
 
 ### 2. Compilar y Ejecutar el Servidor
 
 En directorio pcbox-backend/:
 
+```
 npm run build
 npm start
+```

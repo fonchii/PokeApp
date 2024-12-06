@@ -25,8 +25,19 @@
 ## Utilización
 
 ### Modo desarrollo
-Ejecutar
-¨npm run dev¨
+
+Ejecutar:
+```
+npm run dev
+```
+
+
+### Producción
+Ejecutar:
+
+```
+npm run build
+```
 
 ## Bugs Conocidos
 
