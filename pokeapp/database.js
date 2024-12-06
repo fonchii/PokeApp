@@ -3,7 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 
 // -- BD Grupo -- //
 // Ruta a la base de datos 
-const partyDBPath = path.resolve(__dirname, '../../party.db');
+const partyDBPath = path.resolve(__dirname, 'party.db');
 const partyDB = new sqlite3.Database(partyDBPath, (err) => {
   if (err) {
     console.error('Error al conectar con la base de datos del Equipo Pokemon :', err.message);
