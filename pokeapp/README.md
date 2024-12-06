@@ -40,7 +40,7 @@ Ejecutar:
 npm install
 npm run build
 ```
-Buscar el ejecutable en el directorio `dist/win-unpacked/` o instalar mediante el instalador `pokeapp/Setup 0.1.0.exe`.
+Buscar el ejecutable en el directorio `dist/win-unpacked/` o instalar mediante el instalador `pokeapp/Setup 1.0.0.exe`.
 
 
 ## Bugs Conocidos
