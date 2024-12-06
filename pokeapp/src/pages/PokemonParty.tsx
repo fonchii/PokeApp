@@ -16,17 +16,18 @@ const PokemonParty: React.FC = () => {
     const [snackbarMessage, setSnackbarMessage] = useState<string>('');
     const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'warning' | 'error'>('success');
 
-    const handleRelease = async (db_id: number) => {
+    const handleRelease = async (pokemon: Pokemon) => {
         if (!window.electronAPI) {
           console.error('Electron API no está disponible');
           return;
         }
-    
+        const db_id = pokemon.db_id
+        const name = pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)
         try {
           const result = await window.electronAPI.removePokemon(db_id);
           if (result.success) {
             dispatch(releasePokemonFromParty(db_id));
-            setSnackbarMessage('Pokémon liberado correctamente.');
+            setSnackbarMessage(`Te extrañaremos ${name} :(`);
             setSnackbarSeverity('success');
           } else {
             setSnackbarMessage('No se pudo liberar el Pokémon.');
@@ -60,7 +61,7 @@ const PokemonParty: React.FC = () => {
       ) : (
         <Grid container spacing={2}>
           {party.map((pokemon: Pokemon) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={pokemon.id}>
+            <Grid item xs={12} sm={6} md={4} lg={3} key={pokemon.db_id}>
               <Card sx={{ maxWidth: 345, textAlign: 'center' }}>
 
                 {/* Imagen */}
@@ -97,7 +98,7 @@ const PokemonParty: React.FC = () => {
                     <Button
                         size="small"
                         color="error"
-                        onClick={() => handleRelease(pokemon.db_id)}
+                        onClick={() => handleRelease(pokemon)}
                         startIcon={<RemoveCircleOutlineIcon />} 
                     >
                         Liberar

@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import partyReducer from './slices/partySlice';
+import pcBoxReducer from './slices/pcBoxSlice';
 
 const store = configureStore({
   reducer: {
     party: partyReducer,
+    pcBox: pcBoxReducer,
   },
 });
 

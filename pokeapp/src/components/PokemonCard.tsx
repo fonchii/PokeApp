@@ -5,7 +5,8 @@ import PokemonDetailModal from './PokemonDetailModal';
 import CatchingPokemonIcon from '@mui/icons-material/CatchingPokemon';
 
 import { useAppDispatch } from '../store/hooks';
-import { addPokemonToParty, Pokemon as StoredPokemon } from '../store/slices/partySlice';
+import { addPokemonToParty, Pokemon as PartyPokemon } from '../store/slices/partySlice';
+import { addPokemonToPCBox, PCBoxPokemon } from '../store/slices/pcBoxSlice';
 
 
 interface Props {
@@ -26,7 +27,7 @@ interface RawPokemon {
     moves: { move: { name: string } }[];
 }
 
-/* interface StoredPokemon {
+/* interface PartyPokemon {
     id: number;
     name: string;
     image: string;
@@ -37,7 +38,7 @@ interface RawPokemon {
 } */
 
 const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
-    const [pokemon, setPokemon] = useState<Omit<StoredPokemon, 'db_id'> | null>(null);
+    const [pokemon, setPokemon] = useState<Omit<PartyPokemon, 'db_id'> | null>(null);
     const [showModal, setShowModal] = useState<boolean>(false);
 
     const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
@@ -46,7 +47,7 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
 
     const dispatch = useAppDispatch();
 
-  // Obtener datos del Pokémon desde la API al montar el componente
+  // Obtener datos del Pokemon desde la API al montar el componente
   useEffect(() => {
     const fetchPokemon = async () => {
       try {
@@ -74,7 +75,7 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
             ? flavorTextEntry.flavor_text.replace(/\f/g, ' ')
             : 'Descripción no encontrada.';
 
-        const tempPokemon: Omit<StoredPokemon, 'db_id'> = {
+        const tempPokemon: Omit<PartyPokemon, 'db_id'> = {
             id: data.id,
             name: data.name,
             image: imageUrl,
@@ -87,7 +88,7 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
           setPokemon(tempPokemon);
 
       } catch (error) {
-        console.error('Error al obtener datos del Pokémon:', error);
+        console.error('Error al obtener datos del Pokemon:', error);
       }
     };
 
@@ -108,53 +109,78 @@ const PokemonCard: React.FC<Props> = ({ pokemonUrl }) => {
         // Verificar si el grupo ya tiene 6 Pokemon
         const currentParty = await window.electronAPI.loadParty();
         let msg: string
-        if (currentParty.length >= 6) {
-            msg = `Tu equipo está completo, ${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)} fué enviado al PC.` 
-            //setSnackbarMessage('No puedes llevar más de 6 Pokemon!');
-            //setSnackbarMessage(msg)
-            //setSnackbarSeverity('warning');
-            //setOpenSnackbar(true);
-            //return;
-        }
-        else{
-            msg = `${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)} capturado!`
-        }
-  
+
         // Asignar un nivel aleatorio entre 5 y 100
         const level = Math.floor(Math.random() * 96) + 5; // 5 a 100
-  
-        // Crear el objeto del nuevo Pokémon
-        const newPokemon: Omit<StoredPokemon, 'db_id'> = {
+
+        
+        // Crear el objeto del nuevo Pokemon
+        const newPokemon: Omit<PartyPokemon, 'db_id'> = {
             ...pokemon,
-            //description: description,
             level: level,
           };
+
+        const pokemonName = `${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}`
     
         //  console.log(newPokemon);
   
-        // Enviar el nuevo Pokémon al Proceso Principal para agregar al grupo
-        const result = await window.electronAPI.addPokemon(newPokemon);
-        console.log('result: ', result)
-  
-        if (result.success && result.db_id) {
-            const pokemonWithDbId: StoredPokemon = {
-                ...newPokemon,
-                db_id: result.db_id,
-              };
-            console.log('pokemonWithDbId: ', pokemonWithDbId)
-            setSnackbarMessage(msg);
-            setSnackbarSeverity('success');
-            // Actualizar el estado de Redux
-            dispatch(addPokemonToParty(pokemonWithDbId));
-        } else {
-            setSnackbarMessage(result.message || `${pokemon.name.charAt(0).toUpperCase() + newPokemon.name.slice(1)} ha escapado.`);
-            setSnackbarSeverity('error');
+        
+        if (currentParty.length >= 6) {
+            // La Party está llena, enviar al PC Box
+            msg = `Tu equipo está completo, ${pokemonName} fué enviado al PC.` 
+
+            try {
+                // Enviar el Pokémon al PC Box mediante una solicitud HTTP al backend
+                const response = await axios.post('http://localhost:5000/api/pcbox', newPokemon);
+      
+                if (response.status === 201) {
+                    // Actualizar el estado de Redux
+                    dispatch(addPokemonToPCBox(response.data)); 
+                    // Notificar
+                    setSnackbarMessage(msg);
+                    setSnackbarSeverity('success');
+                } else {
+                  throw new Error('No se pudo enviar el Pokémon al PC Box.');
+                }
+              } catch (error) {
+                console.error('Error al enviar el Pokémon al PC Box:', error);
+                //setSnackbarMessage('Ocurrió un error al enviar el Pokémon al PC Box.');
+                setSnackbarMessage(`${pokemonName} no logró llegar a PC Box.` )
+                setSnackbarSeverity('error');
+              }
+
+
         }
+        else{
+            // La Party tiene espacio, añadir directamente
+            msg = `${pokemonName} capturado!`
+
+            // Enviar el Pokémon a la Party mediante Electron IPC
+            const result = await window.electronAPI.addPokemon(newPokemon);
+            console.log('result: ', result)
+
+            if (result.success && result.db_id) {
+                const pokemonWithDbId: PartyPokemon = {
+                    ...newPokemon,
+                    db_id: result.db_id,
+                  };
+                console.log('pokemonWithDbId: ', pokemonWithDbId)
+                setSnackbarMessage(msg);
+                setSnackbarSeverity('success');
+                // Actualizar el estado de Redux
+                dispatch(addPokemonToParty(pokemonWithDbId));
+            } else {
+                setSnackbarMessage(result.message || `${pokemon.name.charAt(0).toUpperCase() + newPokemon.name.slice(1)} ha escapado.`);
+                setSnackbarSeverity('error');
+            }
+
+        }
+  
         setOpenSnackbar(true);
         
     } catch (error) {
-        console.error('Error al capturar el Pokémon:', error);
-        setSnackbarMessage('Ocurrió un error al capturar el Pokémon.');
+        console.error('Error al capturar el Pokemon:', error);
+        setSnackbarMessage('Ocurrió un error al capturar el Pokemon.');
         setSnackbarSeverity('error');
         setOpenSnackbar(true);
       }

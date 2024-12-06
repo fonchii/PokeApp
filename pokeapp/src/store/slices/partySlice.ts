@@ -4,7 +4,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 // Todo: Investigar -> createAsyncThunk
 
 export interface Pokemon {
-    db_id: number;
+    db_id: number; // Identificador de SQLite
     id: number;
     name: string;
     image: string;
@@ -49,7 +49,7 @@ const partySlice = createSlice({
     },
 
 
-    // Cargar PC Box desde SQLite
+    /* // Cargar PC Box desde SQLite
     loadPCBox(state, action: PayloadAction<Pokemon[]>) {
             state.pcBox = action.payload;
     },
@@ -62,7 +62,7 @@ const partySlice = createSlice({
     // Liberar Pokémon del PC Box
     releasePokemonFromPCBox(state, action: PayloadAction<number>) {
         state.pcBox = state.pcBox.filter(pokemon => pokemon.db_id !== action.payload);
-    },
+    }, */
 
   },
 });
@@ -72,10 +72,11 @@ export const {
     loadParty, 
     addPokemonToParty, 
     releasePokemonFromParty, 
-    // PC Box
+    
+    /* // PC Box
     loadPCBox,
     addPokemonToPCBox,
-    releasePokemonFromPCBox
+    releasePokemonFromPCBox */
 } = partySlice.actions;
 
 export default partySlice.reducer;

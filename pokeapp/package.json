@@ -46,7 +46,7 @@
       "build/**/*",
       "main.js",
       "preload.js",
-      "pokemon.db"
+      "party.db"
     ],
     "directories": {
       "buildResources": "assets"

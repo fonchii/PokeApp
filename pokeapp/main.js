@@ -1,7 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-//const db = require('./src/database/database');
-const { partyDB, pcBoxDB } = require('./src/database/database.js')
+const partyDB = require('./src/database/database.js')
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -62,15 +61,18 @@ app.whenReady().then(() => {
   });
 });
 
+// Cerrar la conexión a la base de datos al salir
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  if (process.platform !== 'darwin') {
+    partyDB.close();
+    app.quit();}
 });
 
 
 
-// --- Funciones IPC para grupo Pokemon --- //
+// --- Funciones IPC para Equipo Pokemon --- //
 
-// Cargar grupo Pokemon desde la base de datos
+// Cargar Equipo Pokemon desde la base de datos
 ipcMain.handle('load-party', (event) => {
     return new Promise((resolve, reject) => {
       partyDB.all('SELECT * FROM party', [], (err, rows) => {
@@ -96,31 +98,9 @@ ipcMain.handle('add-pokemon', (event, pokemon) => {
         if (err) {
           reject(err);
         } else if (row.count >= 6) {
-          //resolve({ success: false, message: 'No puedes llevar más de 6 Pokemon!' });
+            // Si la Party está llena, informar al frontend para que maneje el almacenamiento en el PC Box
+            resolve({ success: false, message: 'No puedes llevar más de 6 Pokemon en tu equipo!' });
           
-          // Añadir al PC Box si la party está llena
-            const stmt = pcBoxDB.prepare(`
-                INSERT INTO pc_box (id, name, image, type, description, attacks, level)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            `);
-            stmt.run(
-                pokemon.id,
-                pokemon.name,
-                pokemon.image,
-                JSON.stringify(pokemon.type),
-                pokemon.description,
-                JSON.stringify(pokemon.attacks),
-                pokemon.level,
-                function (err) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve({ success: true, db_id: this.lastID, addedToPCBox: true });
-                }
-                }
-            );
-            stmt.finalize();
-
         } else {
             // Añadir al equipo si hay espacio
             const stmt = partyDB.prepare(`
@@ -139,7 +119,7 @@ ipcMain.handle('add-pokemon', (event, pokemon) => {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({ success: true, db_id: this.lastID });
+                    resolve({ success: true, db_id: this.lastID, addedToPCBox: false });
                 }
                 }
             );
@@ -166,9 +146,7 @@ ipcMain.handle('remove-pokemon', (event, db_id) => {
 
 
 
-
-
-// --- Funciones IPC para el PC Box --- //
+/* // --- Funciones IPC para el PC Box --- //
 
 // Cargar los Pokémon del PC Box desde la base de datos
 ipcMain.handle('load-pcbox', (event) => {
@@ -234,4 +212,4 @@ ipcMain.handle('load-pcbox', (event) => {
       });
       stmt.finalize();
     });
-  });
+  }); */

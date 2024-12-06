@@ -1,57 +1,58 @@
-// src/Pages/PCBox.tsx
-
 import React, { useEffect } from 'react';
 import { Typography, Grid, Card, CardMedia, CardContent, CardActions, Button, Snackbar, Alert } from '@mui/material';
-import { useAppSelector, useAppDispatch } from '../store/hooks';
-import { RootState } from '../store/store';
-import { loadPCBox, releasePokemonFromPCBox, Pokemon } from '../store/slices/partySlice';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import axios from 'axios';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { releasePokemonFromPCBox, PCBoxPokemon, loadPCBox } from '../store/slices/pcBoxSlice';
 
 const PCBox: React.FC = () => {
-  const pcBox = useAppSelector((state: RootState) => state.party.pcBox);
+  // Obtener el estado de PC Box desde Redux
+  const pcBox = useAppSelector((state) => state.pcBox.pcBox);
   const dispatch = useAppDispatch();
 
   const [openSnackbar, setOpenSnackbar] = React.useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState<string>('');
-  const [snackbarSeverity, setSnackbarSeverity] = React.useState<'success' | 'warning' | 'error'>('success');
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState<'success' | 'error'>('success');
 
   useEffect(() => {
     const fetchPCBox = async () => {
       try {
-            const pcBoxData = await window.electronAPI.loadPCBox();
-            dispatch(loadPCBox(pcBoxData));
+        const response = await axios.get<PCBoxPokemon[]>('http://localhost:5000/api/pcbox'); // Asegúrate de que la URL y el puerto sean correctos
+        dispatch(loadPCBox(response.data)); // Cargar en Redux
       } catch (error) {
-            console.error('Error al cargar el PC Box:', error);
+        console.error('Error al cargar el PC Box:', error);
+        setSnackbarMessage('Error al cargar el PC Box.');
+        setSnackbarSeverity('error');
+        setOpenSnackbar(true);
       }
     };
 
     fetchPCBox();
   }, [dispatch]);
 
-  const handleRelease = async (db_id: number) => {
+  const handleRelease = async (pokemon: PCBoxPokemon) => {
     try {
-      const result = await window.electronAPI.removePCBoxPokemon(db_id);
-      if (result.success) {
-            dispatch(releasePokemonFromPCBox(db_id));
-            setSnackbarMessage('Pokémon liberado del PC Box correctamente.');
-            setSnackbarSeverity('success');
+      const response = await axios.delete(`http://localhost:5000/api/pcbox/${pokemon._id}`); // Usa _id
+      if (response.status === 200) {
+        dispatch(releasePokemonFromPCBox(pokemon._id));
+        setSnackbarMessage('Pokémon liberado del PC Box correctamente.');
+        setSnackbarSeverity('success');
       } else {
-            setSnackbarMessage('No se pudo liberar el Pokémon del PC Box.');
-            setSnackbarSeverity('error');
+        throw new Error('No se pudo liberar el Pokémon del PC Box.');
       }
     } catch (error) {
-        console.error('Error al liberar el Pokémon del PC Box:', error);
-        setSnackbarMessage('Ocurrió un error al liberar el Pokémon del PC Box.');
-        setSnackbarSeverity('error');
+      console.error('Error al liberar el Pokémon del PC Box:', error);
+      setSnackbarMessage('Ocurrió un error al liberar el Pokémon del PC Box.');
+      setSnackbarSeverity('error');
     } finally {
-        setOpenSnackbar(true);
+      setOpenSnackbar(true);
     }
   };
 
   const handleCloseSnackbar = () => {
-        setOpenSnackbar(false);
-        setSnackbarMessage('');
-        setSnackbarSeverity('success');
+    setOpenSnackbar(false);
+    setSnackbarMessage('');
+    setSnackbarSeverity('success');
   };
 
   return (
@@ -63,8 +64,8 @@ const PCBox: React.FC = () => {
         <Typography variant="body1">No tienes Pokémon en el PC Box.</Typography>
       ) : (
         <Grid container spacing={2}>
-          {pcBox.map((pokemon: Pokemon) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={pokemon.db_id}>
+          {pcBox.map((pokemon: PCBoxPokemon) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={pokemon._id}>
               <Card sx={{ maxWidth: 345, textAlign: 'center' }}>
                 {/* Imagen */}
                 <CardMedia
@@ -100,7 +101,7 @@ const PCBox: React.FC = () => {
                   <Button
                     size="small"
                     color="error"
-                    onClick={() => handleRelease(pokemon.db_id)}
+                    onClick={() => handleRelease(pokemon)}
                     startIcon={<RemoveCircleOutlineIcon />}
                   >
                     Liberar

@@ -33,8 +33,12 @@ partyDB.run(createPartyTable, (err) => {
   }
 });
 
+// Exportar la conexión a la base de datos del Equipo Pokemon
+module.exports = partyDB;
 
 
+
+/* Uso de SQLite para PC Box 
 // -- BD PC Box -- //
 const pcBoxDBPath = path.resolve(__dirname, '../../pcbox.db');
 const pcBoxDB = new sqlite3.Database(pcBoxDBPath, (err) => {
@@ -66,4 +70,4 @@ const pcBoxDB = new sqlite3.Database(pcBoxDBPath, (err) => {
 });
 
 // Exportar ambas conexiones a las bases de datos
-module.exports = { partyDB, pcBoxDB };
+module.exports = { partyDB, pcBoxDB }; */
