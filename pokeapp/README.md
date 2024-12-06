@@ -28,3 +28,7 @@
 Ejecutar
 ¨npm run dev¨
 
+## Bugs Conocidos
+
+- Algunas veces el sprite de Pokemon shiny no aparece ni se guarda correctamente, visualizándose el sprite normal
+- El "mismo" Pokemon puede ser capturado multiples veces, es decir, si aparece un Shiny puede capturarse multiples veces generando niveles diferentes cada vez.
