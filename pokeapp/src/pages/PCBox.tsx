@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Typography, Grid, Card, CardMedia, CardContent, CardActions, Button, Snackbar, Alert } from '@mui/material';
+import { Typography, Grid, Card, CardMedia, CardContent, CardActions, Button, Stack, Chip, Snackbar, Alert } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import axios from 'axios';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
@@ -82,18 +82,48 @@ const PCBox: React.FC = () => {
 
                 {/* Información */}
                 <CardContent>
+                  
                   <Typography gutterBottom variant="h5" component="div">
                     {capitalize(pokemon.name)}
                   </Typography>
+
                   <Typography variant="body2" color="text.secondary">
                     Pokédex: {pokemon.id}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Tipo: {pokemon.type.join(', ')}
-                  </Typography>
+
+                  
                   <Typography variant="body2" color="text.secondary">
                     Nivel: {pokemon.level}
                   </Typography>
+
+                  {/* <Typography variant="body2" color="text.secondary">
+                    Tipo: {pokemon.type.join(', ')}
+                  </Typography> */}
+                 <Typography variant="subtitle1" gutterBottom>
+                        Tipo:
+                    </Typography>
+                    <Stack 
+                        direction="row" 
+                        spacing={1.5} 
+                        flexWrap="wrap" 
+                        justifyContent="center" 
+                        sx={{ marginBottom: '16px' }}
+                        >
+                            {pokemon.type.map((typeName) => (
+                                typeName !== "fairy" && <Chip key={typeName} label={typeName} />
+                        ))}
+                    </Stack>
+                    
+                    <Typography variant="subtitle1" gutterBottom sx={{ marginTop: 2 }}>
+                        Movimientos:
+                    </Typography>
+                    <Stack direction="row" spacing={1.5} flexWrap="wrap" justifyContent="center">
+                        {pokemon.attacks.map((moveName) => (
+                            <Chip key={moveName} label={moveName} />
+                        ))}
+                    </Stack>
+
+
                 </CardContent>
 
                 {/* Acciones */}

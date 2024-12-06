@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import { Grid, Card, CardMedia, CardContent, Typography, CardActions, Button, Snackbar, Alert } from '@mui/material';
+import { Grid, Card, CardMedia, CardContent, Typography, Stack, Chip, CardActions, Button, Snackbar, Alert } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 
 import { useAppSelector, useAppDispatch } from '../store/hooks';
@@ -61,8 +61,8 @@ const PokemonParty: React.FC = () => {
       ) : (
         <Grid container spacing={2}>
           {party.map((pokemon: Pokemon) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={pokemon.db_id}>
-              <Card sx={{ maxWidth: 345, textAlign: 'center' }}>
+            <Grid item xs={12} sm={6} md={4} lg={4} key={pokemon.db_id}>
+              <Card sx={{ maxWidth: 345, textAlign: 'center', mb:'.5vh', }}>
 
                 {/* Imagen */}
                 <CardMedia
@@ -78,22 +78,45 @@ const PokemonParty: React.FC = () => {
                 />
 
                 {/* Info */}
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    {pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Pokedex: {pokemon.id}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Tipo: {pokemon.type}
-                  </Typography>
-                  {/* <Typography variant="body2" color="text.secondary">
-                    Movimientos: {pokemon.attacks}
-                  </Typography> */}
+                <CardContent >
+                  
+                    <Typography gutterBottom variant="h5" component="div">
+                        {pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}
+                    </Typography>
+                    
+                    <Typography variant="body2" color="text.secondary">
+                        Pokedex: {pokemon.id}
+                    </Typography>
+                    
                   <Typography variant="body2" color="text.secondary">
                     Nivel: {pokemon.level}
                   </Typography>
+                    
+                    <Typography variant="subtitle1" gutterBottom>
+                        Tipo:
+                    </Typography>
+                    <Stack 
+                        direction="row" 
+                        spacing={1.5} 
+                        flexWrap="wrap" 
+                        justifyContent="center" 
+                        sx={{ marginBottom: '16px' }}
+                        >
+                            {pokemon.type.map((typeName) => (
+                                typeName !== "fairy" && <Chip key={typeName} label={typeName} />
+                        ))}
+                    </Stack>
+                    
+                    <Typography variant="subtitle1" gutterBottom sx={{ marginTop: 2 }}>
+                        Movimientos:
+                    </Typography>
+                    <Stack direction="row" spacing={1.5} flexWrap="wrap" justifyContent="center">
+                        {pokemon.attacks.map((moveName) => (
+                            <Chip key={moveName} label={moveName} />
+                        ))}
+                    </Stack>
+                  
+
                 </CardContent>
 
                 {/* Liberar :( */}

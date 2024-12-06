@@ -43,7 +43,7 @@ const PokemonDetailModal: React.FC<Props> = ({ pokemon, onClose }) => {
         </Typography>
         <Stack direction="row" spacing={1}>
           {pokemon.attacks.map((moveName) => (
-            <Chip key={moveName} label={moveName} /* Puedes añadir estilos adicionales si lo deseas */ />
+            <Chip key={moveName} label={moveName}/>
           ))}
         </Stack>
       </DialogContent>
