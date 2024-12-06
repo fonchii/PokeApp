@@ -47,11 +47,8 @@
       "build/**/*",
       "main.js",
       "preload.js",
-      "party.db",
       "database.js",
-      "server.js",
-      "public/types/*",
-      "public/icons/*"
+      "server.js"
     ],
     "extraFiles": [
       

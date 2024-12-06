@@ -4,6 +4,7 @@ const server = require(path.join(__dirname, 'server.js'));
 //const partyDB = require('./src/database/database.js')
 const partyDB = require(path.join(__dirname, 'database.js'));
 
+console.log('partyDB: ' ,partyDB)
 function createWindow() {
   const win = new BrowserWindow({
     width: 1280,
@@ -82,10 +83,12 @@ app.on('window-all-closed', () => {
 
 // Cargar Equipo Pokemon desde la base de datos
 ipcMain.handle('load-party', (event) => {
+    console.log('Cargando Equipo Pokemon')
     return new Promise((resolve, reject) => {
       partyDB.all('SELECT * FROM party', [], (err, rows) => {
         if (err) {
-          reject(err);
+            console.error('Cargando Equipo Pokemon: ', err)
+            reject(err);
         } else {
           // Parsear campos JSON
           const parsedRows = rows.map(row => ({
@@ -101,6 +104,7 @@ ipcMain.handle('load-party', (event) => {
 
 // Añadir un Pokémon a la Party o al PC Box si la Party está llena
 ipcMain.handle('add-pokemon', (event, pokemon) => {
+    console.log('Capturando Pokemon')
     return new Promise((resolve, reject) => {
       partyDB.get('SELECT COUNT(*) as count FROM party', [], (err, row) => {
         if (err) {
